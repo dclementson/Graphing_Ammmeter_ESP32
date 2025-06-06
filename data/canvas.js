@@ -23,6 +23,7 @@ var scopeSamples5 = []; // Primary Y axis
 var scopeSamplesT = []; // Primary Y axis
 var chartScope;
 var chartMillis = 0;
+var chartSecs = 0;
 var ampScale = 5 / 4095;
 var ampOffset = 0;
 var vertCal = 3.3 / 4095;
@@ -41,7 +42,8 @@ function setupScopeChart() {
       fontFamily: "arial",
     },
     axisX: {
-      // title: "Time",
+      title: "Time (ms)",
+      //suffix: "ms",
       gridColor: "#555555",
       titleFontSize: 15,
       minimum: 0,
@@ -50,7 +52,7 @@ function setupScopeChart() {
       tickThickness: 2,
       gridDashType: "solid",
       gridThickness: 2,
-      valueFormatString: " ",
+      valueFormatString: "0.0# e0",
     },
     axisY: {
       title: "Current",
@@ -168,6 +170,17 @@ function parseMessage(message) {
               lastTrigFlag = currentTrigFlag;
           }
           
+          chartMillis = chartMillis + parseInt(analogSamples[0]); //update display pointer
+          if (chartMillis >= chartSize) {
+            chartMillis = 0;
+            scopeSamples1.length = 0;
+            scopeSamples2.length = 0; 
+            scopeSamples3.length = 0;
+            scopeSamples4.length = 0;
+            scopeSamples5.length = 0;
+            scopeSamplesT.length = 0;
+          }
+
           // send to display here
           document.getElementById("CurrentVal1").innerHTML=ch1Value.toFixed(1) + " A";
           document.getElementById("CurrentVal2").innerHTML=ch2Value.toFixed(1) + " A";
@@ -175,6 +188,7 @@ function parseMessage(message) {
           document.getElementById("CurrentVal4").innerHTML=ch4Value.toFixed(1) + " A";
           document.getElementById("CurrentVal5").innerHTML=ch5Value.toFixed(1) + " A";
           document.getElementById("CurrentValT").innerHTML=chTValue.toFixed(1) + " A";
+          
           //  Push the X,Y sample into the graph buffer ====>
           scopeSamples1.push({
             // data to the display
@@ -206,18 +220,6 @@ function parseMessage(message) {
             x: chartMillis,
             y: chTValue,
           });
-
-
-          chartMillis = chartMillis + parseInt(analogSamples[0]); //update display pointer
-          if (chartMillis >= chartSize) {
-            chartMillis = 0;
-            scopeSamples1.length = 0;
-            scopeSamples2.length = 0; 
-            scopeSamples3.length = 0;
-            scopeSamples4.length = 0;
-            scopeSamples5.length = 0;
-            scopeSamplesT.length = 0;
-          }
         }
       }
 
@@ -293,7 +295,7 @@ function onMessage(event) {
 }
 
 // Get the element with id="defaultOpen" and click on it
-//document.getElementById("defaultOpen").click();
+document.getElementById("defaultOpen").click();
 
 window.addEventListener('load', onLoad);
 

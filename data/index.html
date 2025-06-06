@@ -16,7 +16,7 @@
   <div class="box">
     <div class="row header">
       <div class="tab">
-        <button class="tablinks" onclick="openWindow(event, 'DigitalMeter')">Digital Meter</button>
+        <button class="tablinks" onclick="openWindow(event, 'DigitalMeter')" id="defaultOpen">Digital Meter</button>
         <button class="tablinks" onclick="openWindow(event, 'Graph')">Graph</button>
         <button class="tablinks" onclick="openWindow(event, 'Settings')">Settings</button>
       </div>
@@ -24,6 +24,7 @@
     <div id="contentWindow" class="row content">
 
       <div id="DigitalMeter" class="tabcontent">
+        <h1>Multichannel Ammeter</h1>
         <div id="DigitalMeter1" class="meterWindow">
           <p>Channel 1</p>
           <p id="CurrentVal1">value</p>
