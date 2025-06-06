@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Web-based Graphing Ammeter">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graphing Ammeter</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- get file below from http://canvasjs.com/ -->
+  <script type="text/javascript" src="canvasjs.min.js"></script>
+</head>
+
+<body>
+  <div class="box">
+    <div class="row header">
+      <div class="tab">
+        <button class="tablinks" onclick="openWindow(event, 'DigitalMeter')">Digital Meter</button>
+        <button class="tablinks" onclick="openWindow(event, 'Graph')">Graph</button>
+        <button class="tablinks" onclick="openWindow(event, 'Settings')">Settings</button>
+      </div>
+    </div>
+    <div id="contentWindow" class="row content">
+
+      <div id="DigitalMeter" class="tabcontent">
+        <div id="DigitalMeter1" class="meterWindow">
+          <p>Channel 1</p>
+          <p id="CurrentVal1">value</p>
+        </div>
+        <div id="DigitalMeter2" class="meterWindow">
+          <p>Channel 2</p>
+          <p id="CurrentVal2">value</p>
+        </div>
+        <div id="DigitalMeter3" class="meterWindow">
+          <p>Channel 3</p>
+          <p id="CurrentVal3">value</p>
+        </div>
+        <div id="DigitalMeter4" class="meterWindow">
+          <p>Channel 4</p>
+          <p id="CurrentVal4">value</p>
+        </div>
+        <div id="DigitalMeter5" class="meterWindow">
+          <p>Channel 5</p>
+          <p id="CurrentVal5">value</p>
+        </div>
+        <div id="DigitalMeterT" class="meterWindow">
+          <p>Total</p>
+          <p id="CurrentValT">value</p>
+        </div>
+      </div>
+
+
+
+      <div id="Graph" class="tabcontent">
+        <div id="chartScope" class="chartContainer"></div>
+      </div>
+
+      <div id="Settings" class="tabcontent">
+        <form id="formSR" action="/action_page.php">
+          <p>ADC<br>Sample Interval:</p>
+          <label for="2ms_SI"><input type="radio" checked="checked" id="2ms_SI" name="sampleInterval" value="2"> 2
+            ms</label>
+          <label for="5ms_SI"><input type="radio" id="5ms_SI" name="sampleInterval" value="5"> 5 ms</label>
+          <label for="10ms_SI"><input type="radio" id="10ms_SI" name="sampleInterval" value="10">10 ms</label>
+          <label for="20ms_SI"><input type="radio" id="20ms_SI" name="sampleInterval" value="20">20 ms</label>
+        </form>
+
+        <form id="formMR" action="/action_page.php">
+          <p>Message<br>Interval:</p>
+          <label for="50ms_MI"><input type="radio" checked="checked" id="50ms_MI" name="messageInterval" value="50"> 50
+            ms</label>
+          <label for="100ms_MI"><input type="radio" id="100ms_MI" name="messageInterval" value="100">100 ms</label>
+          <label for="200ms_MI"><input type="radio" id="200ms_MI" name="messageInterval" value="200">200 ms</label>
+        </form>
+
+        <form id="formCS" action="/action_page.php">
+          <p>Graph<br>Span:</p>
+          <label for="5s_Chart"><input type="radio" id="5s_Chart" name="chartSize" value="5000"> 5 s</label>
+          <label for="10s_Chart"><input type="radio" checked="checked" id="10s_Chart" name="chartSize" value="10000">10
+            s</label>
+          <label for="20s_Chart"><input type="radio" id="20s_Chart" name="chartSize" value="20000">20 s</label>
+          <label for="50s_Chart"><input type="radio" id="50s_Chart" name="chartSize" value="50000">50 s</label>
+        </form>
+
+        <form id="formAS" action="/action_page.php">
+          <p>Graph<br>Scale:</p>
+          <label for="noAutoscale"><input type="radio" checked="checked" id="noAutoscale" name="autoScale"
+              value="0">Manual</label>
+          <label for="yesAutoscale"><input type="radio" id="yesAutoscale" name="autoScale" value="1">Auto</label>
+        </form>
+      </div>
+
+    </div>
+    <div id="statusWindow" class="row footer">
+      <p>Status: </p>
+    </div>
+  </div>
+
+  <script src="canvas.js"></script>
+</body>
+
+</html>
