@@ -15,7 +15,12 @@ var dateObject;
 var sampleInterval = 2;
 var messageInterval = 50;
 var chartSize = 10000;
-var scopeSamples = []; // primary Y axis
+var scopeSamples1 = []; // Primary Y axis
+var scopeSamples2 = []; // Primary Y axis
+var scopeSamples3 = []; // Primary Y axis
+var scopeSamples4 = []; // Primary Y axis
+var scopeSamples5 = []; // Primary Y axis
+var scopeSamplesT = []; // Primary Y axis
 var chartScope;
 var chartMillis = 0;
 var ampScale = 5 / 4095;
@@ -45,11 +50,11 @@ function setupScopeChart() {
       tickThickness: 2,
       gridDashType: "solid",
       gridThickness: 2,
-      interval: 1000,
       valueFormatString: " ",
     },
     axisY: {
-      title: "Amps",
+      title: "Current",
+      suffix: "A",
       gridColor: "#555555",
       gridThickness: 2,
       gridDashType: "solid",
@@ -58,12 +63,63 @@ function setupScopeChart() {
       maximum: 25,
       interval: 5,
     },
+    toolTip:{
+		  shared:true
+	  },  
+    legend:{
+      cursor:"pointer",
+      verticalAlign: "bottom",
+      horizontalAlign: "left",
+      dockInsidePlotArea: true,
+    },
     data: [
       {
         color: "red",
+		    showInLegend: true,
+        name: "Channel 1",
         type: "spline",
         markerType: "none",
-        dataPoints: scopeSamples,
+        dataPoints: scopeSamples1,
+      },
+            {
+        color: "cyan",
+        showInLegend: true,
+        name: "Channel 2",        
+        type: "spline",
+        markerType: "none",
+        dataPoints: scopeSamples2,
+      },
+            {
+        color: "blue",
+      	showInLegend: true,
+        name: "Channel 3",
+        type: "spline",
+        markerType: "none",
+        dataPoints: scopeSamples3,
+      },
+            {
+        color: "green",
+    		showInLegend: true,
+        name: "Channel 4",
+        type: "spline",
+        markerType: "none",
+        dataPoints: scopeSamples4,
+      },
+            {
+        color: "yellow",
+    		showInLegend: true,
+        name: "Channel 5",
+        type: "spline",
+        markerType: "none",
+        dataPoints: scopeSamples5,
+      },
+            {
+        color: "white",
+    		showInLegend: true,
+        name: "Total",
+        type: "spline",
+        markerType: "none",
+        dataPoints: scopeSamplesT,
       },
     ],
   });
@@ -120,15 +176,47 @@ function parseMessage(message) {
           document.getElementById("CurrentVal5").innerHTML=ch5Value.toFixed(1) + " A";
           document.getElementById("CurrentValT").innerHTML=chTValue.toFixed(1) + " A";
           //  Push the X,Y sample into the graph buffer ====>
-          scopeSamples.push({
+          scopeSamples1.push({
             // data to the display
             x: chartMillis,
             y: ch1Value,
           });
+          scopeSamples2.push({
+            // data to the display
+            x: chartMillis,
+            y: ch2Value,
+          });
+          scopeSamples3.push({
+            // data to the display
+            x: chartMillis,
+            y: ch3Value,
+          });
+          scopeSamples4.push({
+            // data to the display
+            x: chartMillis,
+            y: ch4Value,
+          });
+          scopeSamples5.push({
+            // data to the display
+            x: chartMillis,
+            y: ch5Value,
+          });
+          scopeSamplesT.push({
+            // data to the display
+            x: chartMillis,
+            y: chTValue,
+          });
+
+
           chartMillis = chartMillis + parseInt(analogSamples[0]); //update display pointer
           if (chartMillis >= chartSize) {
             chartMillis = 0;
-            scopeSamples.length = 0;
+            scopeSamples1.length = 0;
+            scopeSamples2.length = 0; 
+            scopeSamples3.length = 0;
+            scopeSamples4.length = 0;
+            scopeSamples5.length = 0;
+            scopeSamplesT.length = 0;
           }
         }
       }
@@ -232,15 +320,10 @@ form_CS.addEventListener('change', function() {
 const form_AS = document.getElementById('formAS');
 form_AS.addEventListener('change', function() {
   autoScale = document.querySelector('input[name="autoScale"]:checked').value;
-  if (currentTrigFlag) {
-    chartScope.axisY[0].set("minimum", ((autoScale == 1) ? null : -80.1), false);
-    chartScope.axisY[0].set("maximum", ((autoScale == 1) ? null : -9.9), false);
-    chartScope.axisY[0].set("interval", ((autoScale == 1) ? null : 10), false);
-} else {
-    chartScope.axisY[0].set("minimum", ((autoScale == 1) ? null : -60.1), false);
-    chartScope.axisY[0].set("maximum", ((autoScale == 1) ? null : 10.1), false);
-    chartScope.axisY[0].set("interval", ((autoScale == 1) ? null : 10), false);
-}
+
+    chartScope.axisY[0].set("minimum", ((autoScale == 1) ? null : -25), false);
+    chartScope.axisY[0].set("maximum", ((autoScale == 1) ? null : 25), false);
+    chartScope.axisY[0].set("interval", ((autoScale == 1) ? null : 5), false);
   //console.log("Auto Scale = " + autoScale);
 });
 

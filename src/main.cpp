@@ -20,11 +20,11 @@
 
 #define trigSensePin  23  // low = Trigger Active
 #define HTTP_PORT 80
-#define ADC0 32
-#define ADC1 33
-#define ADC2 34
-#define ADC3 35
-#define ADC4 36
+#define ADC0 36
+#define ADC1 37
+#define ADC2 38
+#define ADC3 39
+#define ADC4 34 
 
 const char* ssid  = "ESP32-Access-Point";
 
