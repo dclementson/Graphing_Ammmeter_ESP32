@@ -32,6 +32,8 @@ var vertCal = 3.3 / 4095;
 var autoScale = 2;
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
+var runFlag = 1;
+var collectFlag = 1;
 
 // wrap "new CanvasJS.Chart" into a function
 // to be able move stripLines by calling this function
@@ -194,18 +196,7 @@ function parseMessage(message) {
               lastTrigFlag = currentTrigFlag;
           }
           
-          chartMillis = chartMillis + parseInt(analogSamples[0]); //update display pointer
-          if (chartMillis >= chartSize) {
-            chartMillis = 0;
-            scopeSamples1.length = 0;
-            scopeSamples2.length = 0; 
-            scopeSamples3.length = 0;
-            scopeSamples4.length = 0;
-            scopeSamples5.length = 0;
-            scopeSamples6.length = 0;
-            scopeSamplesT.length = 0;
-          }
-
+          
           // send to display here
           document.getElementById("CurrentVal1").innerHTML=ch1Value.toFixed(1) + " A";
           document.getElementById("CurrentVal2").innerHTML=ch2Value.toFixed(1) + " A";
@@ -216,41 +207,59 @@ function parseMessage(message) {
           document.getElementById("VoltageVal").innerHTML=ch6Value.toFixed(1) + " V";
 
           //  Push the X,Y sample into the graph buffer ====>
-          scopeSamples1.push({
-            // data to the display
-            x: chartMillis,
-            y: ch1Value,
-          });
-          scopeSamples2.push({
-            // data to the display
-            x: chartMillis,
-            y: ch2Value,
-          });
-          scopeSamples3.push({
-            // data to the display
-            x: chartMillis,
-            y: ch3Value,
-          });
-          scopeSamples4.push({
-            // data to the display
-            x: chartMillis,
-            y: ch4Value,
-          });
-          scopeSamples5.push({
-            // data to the display
-            x: chartMillis,
-            y: ch5Value,
-          });
-          scopeSamples6.push({
-            // data to the display
-            x: chartMillis,
-            y: ch6Value,
-          });
-          scopeSamplesT.push({
-            // data to the display
-            x: chartMillis,
-            y: chTValue,
-          });
+          if (collectFlag) {
+            scopeSamples1.push({
+              // data to the display
+              x: chartMillis,
+              y: ch1Value,
+            });
+            scopeSamples2.push({
+              // data to the display
+              x: chartMillis,
+              y: ch2Value,
+            });
+            scopeSamples3.push({
+              // data to the display
+              x: chartMillis,
+              y: ch3Value,
+            });
+            scopeSamples4.push({
+              // data to the display
+              x: chartMillis,
+              y: ch4Value,
+            });
+            scopeSamples5.push({
+              // data to the display
+              x: chartMillis,
+              y: ch5Value,
+            });
+            scopeSamples6.push({
+              // data to the display
+              x: chartMillis,
+              y: ch6Value,
+            });
+            scopeSamplesT.push({
+              // data to the display
+              x: chartMillis,
+              y: chTValue,
+            });
+
+            chartMillis = chartMillis + parseInt(analogSamples[0]); //update display pointer
+            if (chartMillis >= chartSize) {
+              if (runFlag){
+                chartMillis = 0;
+                scopeSamples1.length = 0;
+                scopeSamples2.length = 0; 
+                scopeSamples3.length = 0;
+                scopeSamples4.length = 0;
+                scopeSamples5.length = 0;
+                scopeSamples6.length = 0;
+                scopeSamplesT.length = 0;
+              } else {
+                collectFlag = 0;
+              }
+            }
+          }
         }
       }
 
@@ -325,10 +334,29 @@ function onMessage(event) {
     parseMessage(event);
 }
 
+function toggleRun() {
+  const button = document.getElementById('run')
+  if (runFlag) {
+    runFlag = 0;
+    button.style.backgroundColor = 'orangered'; 
+    button.textContent = 'Stopped';
+  }
+  else {
+    runFlag = 1;
+    collectFlag = 1;
+    button.style.backgroundColor = 'palegreen'; 
+    button.textContent = 'Running';
+  }
+  console.log(" runFlag: " + runFlag)
+}
+
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 
 window.addEventListener('load', onLoad);
+
+var runButton = document.getElementById("run");
+runButton.addEventListener("click", toggleRun);
 
 
 const form_SR = document.getElementById('formSR');
