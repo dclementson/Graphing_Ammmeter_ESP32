@@ -44,7 +44,7 @@ function setupScopeChart() {
       fontFamily: "arial",
     },
     axisX: {
-      title: "Time (ms)",
+      title: "Time (s)",
       //suffix: "ms",
       gridColor: "#555555",
       titleFontSize: 15,
@@ -54,7 +54,7 @@ function setupScopeChart() {
       tickThickness: 2,
       gridDashType: "solid",
       gridThickness: 2,
-      valueFormatString: "0.0# e0",
+      valueFormatString: "#,.0",
     },
     axisY: {
       title: "Current",
@@ -65,6 +65,17 @@ function setupScopeChart() {
       titleFontSize: 15,
       minimum: -25,
       maximum: 25,
+      interval: 5,
+    },
+    axisY2: {
+      title: "Voltage",
+      suffix: "V",
+      gridColor: "#555555",
+      gridThickness: 2,
+      gridDashType: "solid",
+      titleFontSize: 15,
+      minimum: 0,
+      maximum: 50,
       interval: 5,
     },
     toolTip:{
@@ -85,7 +96,7 @@ function setupScopeChart() {
         markerType: "none",
         dataPoints: scopeSamples1,
       },
-            {
+      {
         color: "cyan",
         showInLegend: true,
         name: "Channel 2",        
@@ -93,7 +104,7 @@ function setupScopeChart() {
         markerType: "none",
         dataPoints: scopeSamples2,
       },
-            {
+      {
         color: "blue",
       	showInLegend: true,
         name: "Channel 3",
@@ -101,7 +112,7 @@ function setupScopeChart() {
         markerType: "none",
         dataPoints: scopeSamples3,
       },
-            {
+      {
         color: "green",
     		showInLegend: true,
         name: "Channel 4",
@@ -109,7 +120,7 @@ function setupScopeChart() {
         markerType: "none",
         dataPoints: scopeSamples4,
       },
-            {
+      {
         color: "yellow",
     		showInLegend: true,
         name: "Channel 5",
@@ -117,13 +128,23 @@ function setupScopeChart() {
         markerType: "none",
         dataPoints: scopeSamples5,
       },
-            {
+      {
         color: "white",
     		showInLegend: true,
         name: "Total",
         type: "spline",
         markerType: "none",
         dataPoints: scopeSamplesT,
+      },
+      {
+        color: "magenta",
+        axisYIndex: 1,
+        axisYType: "secondary",
+    		showInLegend: true,
+        name: "Voltage",
+        type: "spline",
+        markerType: "none",
+        dataPoints: scopeSamples6,
       },
     ],
   });
@@ -181,6 +202,7 @@ function parseMessage(message) {
             scopeSamples3.length = 0;
             scopeSamples4.length = 0;
             scopeSamples5.length = 0;
+            scopeSamples6.length = 0;
             scopeSamplesT.length = 0;
           }
 
@@ -218,6 +240,11 @@ function parseMessage(message) {
             // data to the display
             x: chartMillis,
             y: ch5Value,
+          });
+          scopeSamples6.push({
+            // data to the display
+            x: chartMillis,
+            y: ch6Value,
           });
           scopeSamplesT.push({
             // data to the display
