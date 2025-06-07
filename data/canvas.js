@@ -20,11 +20,13 @@ var scopeSamples2 = []; // Primary Y axis
 var scopeSamples3 = []; // Primary Y axis
 var scopeSamples4 = []; // Primary Y axis
 var scopeSamples5 = []; // Primary Y axis
+var scopeSamples6 = []; // Primary Y axis
 var scopeSamplesT = []; // Primary Y axis
 var chartScope;
 var chartMillis = 0;
 var chartSecs = 0;
 var ampScale = 5 / 4095;
+var voltScale = 33 / 4095;
 var ampOffset = 0;
 var vertCal = 3.3 / 4095;
 var autoScale = 2;
@@ -164,7 +166,8 @@ function parseMessage(message) {
           var ch3Value = ((parseInt(analogSamples[3]) * ampScale) - ampOffset);
           var ch4Value = ((parseInt(analogSamples[4]) * ampScale) - ampOffset);
           var ch5Value = ((parseInt(analogSamples[5]) * ampScale) - ampOffset);
-          currentTrigFlag = parseInt(analogSamples[6]);
+          var ch6Value = ((parseInt(analogSamples[6]) * voltScale));
+          currentTrigFlag = parseInt(analogSamples[7]);
           var chTValue = ch1Value + ch2Value + ch3Value + ch4Value + ch5Value;          
           if (currentTrigFlag != lastTrigFlag){
               lastTrigFlag = currentTrigFlag;
@@ -188,7 +191,8 @@ function parseMessage(message) {
           document.getElementById("CurrentVal4").innerHTML=ch4Value.toFixed(1) + " A";
           document.getElementById("CurrentVal5").innerHTML=ch5Value.toFixed(1) + " A";
           document.getElementById("CurrentValT").innerHTML=chTValue.toFixed(1) + " A";
-          
+          document.getElementById("VoltageVal").innerHTML=ch6Value.toFixed(1) + " V";
+
           //  Push the X,Y sample into the graph buffer ====>
           scopeSamples1.push({
             // data to the display

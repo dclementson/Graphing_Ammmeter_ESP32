@@ -21,10 +21,11 @@
 #define trigSensePin  23  // low = Trigger Active
 #define HTTP_PORT 80
 #define ADC0 36
-#define ADC1 37
-#define ADC2 38
-#define ADC3 39
+#define ADC1 39
+#define ADC2 32
+#define ADC3 33
 #define ADC4 34 
+#define ADC5 35 
 
 const char* ssid  = "ESP32-Access-Point";
 
@@ -37,7 +38,7 @@ AsyncWebSocket ws("/ws");
 // Therefore maximum of 720 samples can be made
 //
 #define MAX_NUMBER_OF_SAMPLES 100 // size of circular ADC buffer
-unsigned int samples[5][MAX_NUMBER_OF_SAMPLES];
+unsigned int samples[6][MAX_NUMBER_OF_SAMPLES];
 unsigned int timeStamps[MAX_NUMBER_OF_SAMPLES];
 unsigned int TrigFlags[MAX_NUMBER_OF_SAMPLES];
 unsigned int numberOfSamples = MAX_NUMBER_OF_SAMPLES;
@@ -89,6 +90,7 @@ void sendBuffer() {
       + "@" + String(samples[2][lastXmitSample]) 
       + "@" + String(samples[3][lastXmitSample]) 
       + "@" + String(samples[4][lastXmitSample]) 
+      + "@" + String(samples[5][lastXmitSample])
       + "@" + String(TrigFlags[lastXmitSample]) 
       + ";";
 
@@ -123,7 +125,8 @@ void analogSample(void)
     samples[1][currentSample] = analogRead(ADC1); // analog voltage data
     samples[2][currentSample] = analogRead(ADC2); // analog voltage data
     samples[3][currentSample] = analogRead(ADC3); // analog voltage data
-    samples[4][currentSample] = analogRead(ADC4); // analog voltage data        
+    samples[4][currentSample] = analogRead(ADC4); // analog voltage data   
+    samples[5][currentSample] = analogRead(ADC5); // analog voltage data            
     TrigFlags[currentSample] = digitalRead(trigSensePin);
   }
 }
