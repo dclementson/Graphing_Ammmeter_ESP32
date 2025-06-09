@@ -25,15 +25,20 @@ var scopeSamplesT = []; // Primary Y axis
 var chartScope;
 var chartMillis = 0;
 var chartSecs = 0;
-var ampScale = 5 / 4095;
-var voltScale = 33 / 4095;
-var ampOffset = 0;
-var vertCal = 3.3 / 4095;
+var ampScale = 23.5 / 2048;
+var voltScale = 53 / 4096;
+var ampOffset = 2000;
 var autoScale = 2;
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 var runFlag = 1;
 var collectFlag = 1;
+var ch1Enable = 0;
+var ch2Enable = 0;
+var ch3Enable = 0;
+var ch4Enable = 0;
+var ch5Enable = 0;
+var chTEnable = 0;
 
 // wrap "new CanvasJS.Chart" into a function
 // to be able move stripLines by calling this function
@@ -87,7 +92,7 @@ function setupScopeChart() {
       cursor:"pointer",
       verticalAlign: "bottom",
       horizontalAlign: "left",
-      dockInsidePlotArea: true,
+      dockInsidePlotArea: false,
     },
     data: [
       {
@@ -97,6 +102,7 @@ function setupScopeChart() {
         type: "spline",
         markerType: "none",
         dataPoints: scopeSamples1,
+        visible: false,
       },
       {
         color: "cyan",
@@ -105,6 +111,7 @@ function setupScopeChart() {
         type: "spline",
         markerType: "none",
         dataPoints: scopeSamples2,
+        visible: false,
       },
       {
         color: "blue",
@@ -113,6 +120,7 @@ function setupScopeChart() {
         type: "spline",
         markerType: "none",
         dataPoints: scopeSamples3,
+        visible: false,
       },
       {
         color: "green",
@@ -121,6 +129,7 @@ function setupScopeChart() {
         type: "spline",
         markerType: "none",
         dataPoints: scopeSamples4,
+        visible: false,
       },
       {
         color: "yellow",
@@ -129,6 +138,7 @@ function setupScopeChart() {
         type: "spline",
         markerType: "none",
         dataPoints: scopeSamples5,
+        visible: false,
       },
       {
         color: "white",
@@ -137,6 +147,7 @@ function setupScopeChart() {
         type: "spline",
         markerType: "none",
         dataPoints: scopeSamplesT,
+        visible: false,
       },
       {
         color: "magenta",
@@ -184,26 +195,26 @@ function parseMessage(message) {
         for (var i = 0; i < analogPairs.length; i++) {
           var analogSamples = analogPairs[i].split("@");
           currentMillis = currentMillis + parseInt(analogSamples[0]);
-          var ch1Value = ((parseInt(analogSamples[1]) * ampScale) - ampOffset);
-          var ch2Value = ((parseInt(analogSamples[2]) * ampScale) - ampOffset);
-          var ch3Value = ((parseInt(analogSamples[3]) * ampScale) - ampOffset);
-          var ch4Value = ((parseInt(analogSamples[4]) * ampScale) - ampOffset);
-          var ch5Value = ((parseInt(analogSamples[5]) * ampScale) - ampOffset);
+          var ch1Value = ch1Enable ? ((parseInt(analogSamples[1]) - ampOffset) * ampScale) : 0;
+          var ch2Value = ch2Enable ? ((parseInt(analogSamples[2]) - ampOffset) * ampScale) : 0;
+          var ch3Value = ch3Enable ? ((parseInt(analogSamples[3]) - ampOffset) * ampScale) : 0;
+          var ch4Value = ch4Enable ? ((parseInt(analogSamples[4]) - ampOffset) * ampScale) : 0;
+          var ch5Value = ch5Enable ? ((parseInt(analogSamples[5]) - ampOffset) * ampScale) : 0;
           var ch6Value = ((parseInt(analogSamples[6]) * voltScale));
           currentTrigFlag = parseInt(analogSamples[7]);
-          var chTValue = ch1Value + ch2Value + ch3Value + ch4Value + ch5Value;          
+          var chTValue = chTEnable ? ch1Value + ch2Value + ch3Value + ch4Value + ch5Value : 0;          
           if (currentTrigFlag != lastTrigFlag){
               lastTrigFlag = currentTrigFlag;
           }
           
           
           // send to display here
-          document.getElementById("CurrentVal1").innerHTML=ch1Value.toFixed(1) + " A";
-          document.getElementById("CurrentVal2").innerHTML=ch2Value.toFixed(1) + " A";
-          document.getElementById("CurrentVal3").innerHTML=ch3Value.toFixed(1) + " A";
-          document.getElementById("CurrentVal4").innerHTML=ch4Value.toFixed(1) + " A";
-          document.getElementById("CurrentVal5").innerHTML=ch5Value.toFixed(1) + " A";
-          document.getElementById("CurrentValT").innerHTML=chTValue.toFixed(1) + " A";
+          document.getElementById("CurrentVal1").innerHTML= ch1Enable ? ch1Value.toFixed(1) + " A" : "disabled";
+          document.getElementById("CurrentVal2").innerHTML= ch2Enable ? ch2Value.toFixed(1) + " A" : "disabled";
+          document.getElementById("CurrentVal3").innerHTML= ch3Enable ? ch3Value.toFixed(1) + " A" : "disabled";
+          document.getElementById("CurrentVal4").innerHTML= ch4Enable ? ch4Value.toFixed(1) + " A" : "disabled";
+          document.getElementById("CurrentVal5").innerHTML= ch5Enable ? ch5Value.toFixed(1) + " A" : "disabled";
+          document.getElementById("CurrentValT").innerHTML= chTEnable ? chTValue.toFixed(1) + " A" : "disabled";
           document.getElementById("VoltageVal").innerHTML=ch6Value.toFixed(1) + " V";
 
           //  Push the X,Y sample into the graph buffer ====>
@@ -388,3 +399,34 @@ form_AS.addEventListener('change', function() {
   //console.log("Auto Scale = " + autoScale);
 });
 
+const form_ChEn = document.getElementById('formChEn');
+form_ChEn.addEventListener('change', function() {
+  const ch1enableBox = document.getElementById('ch1En');
+  ch1Enable = ch1enableBox.checked;
+  const ch2enableBox = document.getElementById('ch2En');
+  ch2Enable = ch2enableBox.checked;
+  const ch3enableBox = document.getElementById('ch3En');
+  ch3Enable = ch3enableBox.checked;
+  const ch4enableBox = document.getElementById('ch4En');
+  ch4Enable = ch4enableBox.checked;
+  const ch5enableBox = document.getElementById('ch5En');
+  ch5Enable = ch5enableBox.checked;
+  const chTenableBox = document.getElementById('chTEn');
+  chTEnable = chTenableBox.checked;
+
+  chartScope.options.data[0].visible = ch1Enable;
+  chartScope.options.data[1].visible = ch2Enable;
+  chartScope.options.data[2].visible = ch3Enable;
+  chartScope.options.data[3].visible = ch4Enable;
+  chartScope.options.data[4].visible = ch5Enable;
+  chartScope.options.data[5].visible = chTEnable;
+
+  chartScope.render();
+
+/*   console.log("Ch1 Enable = " + ch1Enable); 
+  console.log("Ch2 Enable = " + ch2Enable); 
+  console.log("Ch3 Enable = " + ch3Enable); 
+  console.log("Ch4 Enable = " + ch4Enable); 
+  console.log("Ch5 Enable = " + ch5Enable);  */
+ 
+})
