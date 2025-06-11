@@ -70,7 +70,7 @@ function setupScopeChart() {
       gridThickness: 2,
       gridDashType: "solid",
       titleFontSize: 15,
-      minimum: -25,
+      minimum: -5,
       maximum: 25,
       interval: 5,
     },
@@ -81,8 +81,8 @@ function setupScopeChart() {
       gridThickness: 2,
       gridDashType: "solid",
       titleFontSize: 15,
-      minimum: 0,
-      maximum: 50,
+      minimum: -5,
+      maximum: 25,
       interval: 5,
     },
     toolTip:{
@@ -393,9 +393,12 @@ const form_AS = document.getElementById('formAS');
 form_AS.addEventListener('change', function() {
   autoScale = document.querySelector('input[name="autoScale"]:checked').value;
 
-    chartScope.axisY[0].set("minimum", ((autoScale == 1) ? null : -25), false);
+    chartScope.axisY[0].set("minimum", ((autoScale == 1) ? null : -5), false);
     chartScope.axisY[0].set("maximum", ((autoScale == 1) ? null : 25), false);
     chartScope.axisY[0].set("interval", ((autoScale == 1) ? null : 5), false);
+    chartScope.axisY2[0].set("minimum", ((autoScale == 1) ? null : -5), false);
+    chartScope.axisY2[0].set("maximum", ((autoScale == 1) ? null : 25), false);
+    chartScope.axisY2[0].set("interval", ((autoScale == 1) ? null : 5), false);
   //console.log("Auto Scale = " + autoScale);
 });
 
