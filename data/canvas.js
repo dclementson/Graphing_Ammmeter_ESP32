@@ -12,7 +12,7 @@ var currentTrigFlag = 0;
 var lastTrigFlag = 0;
 var connection;
 var dateObject;
-var sampleInterval = 2;
+var sampleInterval = 10;
 var messageInterval = 50;
 var chartSize = 10000;
 var scopeSamples1 = []; // Primary Y axis
@@ -26,7 +26,7 @@ var chartScope;
 var chartMillis = 0;
 var chartSecs = 0;
 var ampScale = 23.5 / 2048;
-var voltScale = 53 / 4096;
+var voltScale = 20 / 4096;   //53/4096
 var ampOffset = 2000;
 var autoScale = 2;
 var gateway = `ws://${window.location.hostname}/ws`;
@@ -99,7 +99,7 @@ function setupScopeChart() {
         color: "red",
 		    showInLegend: true,
         name: "Channel 1",
-        type: "spline",
+        type: "line",
         markerType: "none",
         dataPoints: scopeSamples1,
         visible: false,
@@ -108,7 +108,7 @@ function setupScopeChart() {
         color: "cyan",
         showInLegend: true,
         name: "Channel 2",        
-        type: "spline",
+        type: "line",
         markerType: "none",
         dataPoints: scopeSamples2,
         visible: false,
@@ -117,7 +117,7 @@ function setupScopeChart() {
         color: "blue",
       	showInLegend: true,
         name: "Channel 3",
-        type: "spline",
+        type: "line",
         markerType: "none",
         dataPoints: scopeSamples3,
         visible: false,
@@ -126,7 +126,7 @@ function setupScopeChart() {
         color: "green",
     		showInLegend: true,
         name: "Channel 4",
-        type: "spline",
+        type: "line",
         markerType: "none",
         dataPoints: scopeSamples4,
         visible: false,
@@ -135,7 +135,7 @@ function setupScopeChart() {
         color: "yellow",
     		showInLegend: true,
         name: "Channel 5",
-        type: "spline",
+        type: "line",
         markerType: "none",
         dataPoints: scopeSamples5,
         visible: false,
@@ -144,7 +144,7 @@ function setupScopeChart() {
         color: "white",
     		showInLegend: true,
         name: "Total",
-        type: "spline",
+        type: "line",
         markerType: "none",
         dataPoints: scopeSamplesT,
         visible: false,
@@ -155,7 +155,7 @@ function setupScopeChart() {
         axisYType: "secondary",
     		showInLegend: true,
         name: "Voltage",
-        type: "spline",
+        type: "line",
         markerType: "none",
         dataPoints: scopeSamples6,
       },
@@ -300,6 +300,7 @@ function sendMessage() {
   // # MESSAGE_NUMBER SAMPLE_InNTERVAL
   //
   websocket.send("# " + messageCounter + " " + sampleInterval);
+  console.log('Sent websocket message');
 }
 
 function openWindow(evt, windowName) {
@@ -317,6 +318,7 @@ function openWindow(evt, windowName) {
 }
 
 function onLoad(event) {
+  console.log('Init WebSocket connection...');
   setupScopeChart();
   initWebSocket();
 }

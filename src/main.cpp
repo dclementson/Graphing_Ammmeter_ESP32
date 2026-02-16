@@ -26,7 +26,8 @@
 #include <WiFiManager.h>  //needs to be included before ESPAsyncWebServer.h
 #include <WiFi.h>
 #include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
+#include <AsyncEventSource.h>
+
 
 
 #define trigSensePin  23  // low = Trigger Active
@@ -37,8 +38,9 @@
 #define ADC3 33
 #define ADC4 34 
 #define ADC5 35 
-#define MAX_NUMBER_OF_SAMPLES 100 // size of circular ADC buffer
+#define MAX_NUMBER_OF_SAMPLES 100 // size of FIFO ADC buffer
 #define MAX_ARM_COUNT 100  //number of consecutive over-threshold voltage readings for arming
+#define monitorPin GPIO_NUM_27
 
 const char* ssid  = "ESP32-Access-Point";
 
@@ -56,7 +58,6 @@ unsigned int timeStamps[MAX_NUMBER_OF_SAMPLES];
 unsigned int TrigFlags[MAX_NUMBER_OF_SAMPLES];
 unsigned int numberOfSamples = MAX_NUMBER_OF_SAMPLES;
 unsigned int currentSample = 0;
-unsigned int lastXmitSample = 0;
 unsigned int sampleInterval = 10;
 unsigned long millisLastSample = 0;
 unsigned long messageNumber = 0;
@@ -65,6 +66,8 @@ bool armedFlag = false;
 unsigned int trigVoltage = 10;      // peak detector arm threshold
 unsigned int peakValues[6] = {0};  // peak currents & peak total current
 int armCounter = 0;                 //counter for trigger debounce
+
+unsigned int synthData = 0;  //synthesized ADC data generator
 
 void reportSD();
 
@@ -78,8 +81,9 @@ void sendBuffer() {
   unsigned int samplesToXmit = 0;
   String message = "# ";
 
-  if (currentSample == lastXmitSample)
-  {
+  //send null message if no new samples have been taken yet
+  if (currentSample == 0)  // FIF0 buffer empty
+  {  
     message = message + String(messageNumber) + " -";
     // message[message.length() - 1] = '\0';
     message[message.length()] = '\0';
@@ -88,44 +92,51 @@ void sendBuffer() {
   }
   else
   {
-    if (currentSample < lastXmitSample)
-    { // check for buffer wrap
-      samplesToXmit = (numberOfSamples - lastXmitSample + currentSample);
-    }
-    else
-    {
-      samplesToXmit = (currentSample - lastXmitSample);
-    }
     message = message + String(messageNumber) + " ";
-    // for (unsigned int i = 0; i < numberOfSamples; i++)
-    for (unsigned int i = 0; i < samplesToXmit; i++)
+
+    for (unsigned int i = 0; i < currentSample; i++)
     {
-      if (++lastXmitSample >= numberOfSamples)
-      {
-        lastXmitSample = 0;
-      }
-      message = message + String(timeStamps[lastXmitSample]) 
-      + "@" + String(samples[0][lastXmitSample]) 
-      + "@" + String(samples[1][lastXmitSample]) 
-      + "@" + String(samples[2][lastXmitSample]) 
-      + "@" + String(samples[3][lastXmitSample]) 
-      + "@" + String(samples[4][lastXmitSample]) 
-      + "@" + String(samples[5][lastXmitSample])
-      + "@" + String(TrigFlags[lastXmitSample]) 
+      message = message + String(timeStamps[i]) 
+      + "@" + String(samples[0][i]) 
+      + "@" + String(samples[1][i]) 
+      + "@" + String(samples[2][i]) 
+      + "@" + String(samples[3][i]) 
+      + "@" + String(samples[4][i]) 
+      + "@" + String(samples[5][i])
+      + "@" + String(TrigFlags[i]) 
       + ";";
+
+      currentSample = 0;  // FIFO has been emptied
+
+        Serial.print(String(i));
+        Serial.print(" ");
+        Serial.print(String(timeStamps[i]));
+        Serial.print(" ");
+        Serial.println(String(samples[5][i]));
 
     }
     message[message.length() - 1] = '\0';
     ws.textAll(message);
+
+    //Serial.println("WS message sent");
+  
     //webSocket.sendTXT(socketNumber, message);
     // Serial.print("Socket message: [");
     // Serial.print(message);
     // Serial.println("]");
     // Serial.print("Samples collected: ");
     // Serial.println(samplesToXmit);
-
-    // lastXmitSample = currentSample;
+    // Serial.println(String(samples[5][0]));
   }
+}
+unsigned int averageADC (unsigned int ADCNum)
+{
+  unsigned int accum = 0;
+  for (unsigned int i = 0; i < 4; i++) {
+    accum += analogRead(ADCNum);
+  }
+  return (accum >> 2);
+  //return synthData;
 }
 
 void analogSample(void)
@@ -135,19 +146,23 @@ void analogSample(void)
   if (millisDelta > sampleInterval)
   {
     millisLastSample = millisCurrent;
-    currentSample += 1;
-    if (currentSample >= numberOfSamples)
-    {
-      currentSample = 0;
-    }
+
+    digitalWrite(monitorPin,HIGH);
+
+    if ((synthData += millisDelta) >= 4096) { synthData = 0; }
+   
     timeStamps[currentSample] = millisDelta;    // timestamp = millis between last samples
-    samples[0][currentSample] = analogRead(ADC0); // analog current data
-    samples[1][currentSample] = analogRead(ADC1); // analog current data
-    samples[2][currentSample] = analogRead(ADC2); // analog current data
-    samples[3][currentSample] = analogRead(ADC3); // analog current data
-    samples[4][currentSample] = analogRead(ADC4); // analog current data   
-    samples[5][currentSample] = analogRead(ADC5); // analog voltage data            
+    samples[0][currentSample] = averageADC(ADC0); // analog current data
+    samples[1][currentSample] = averageADC(ADC1); // analog current data
+    samples[2][currentSample] = averageADC(ADC2); // analog current data
+    samples[3][currentSample] = averageADC(ADC3); // analog current data
+    samples[4][currentSample] = averageADC(ADC4); // analog current data   
+    samples[5][currentSample] = averageADC(ADC5); // analog voltage data            
     TrigFlags[currentSample] = digitalRead(trigSensePin);
+
+    //Serial.println(String(samples[5][currentSample]));
+    //Serial.println(String(timeStamps[currentSample]));
+    //Serial.println(String(millisDelta));
 
     unsigned int totalCurrent = 
       samples[0][currentSample] 
@@ -163,6 +178,16 @@ void analogSample(void)
     peakValues[3] = samples[3][currentSample] > peakValues[3] ? samples[3][currentSample] : peakValues[3];
     peakValues[4] = samples[4][currentSample] > peakValues[4] ? samples[4][currentSample] : peakValues[4];
     peakValues[5] = totalCurrent > peakValues[5] ? totalCurrent : peakValues[5];
+
+    currentSample += 1;
+
+    if (currentSample >= numberOfSamples)
+    {
+      currentSample = numberOfSamples - 1;  //FIFO buffer is full, overwrite last value
+      //Serial.println("ADC FIFO Full");
+    }
+
+    digitalWrite(monitorPin,LOW);
 
     if (armedFlag){
       if (samples[5][currentSample] < trigVoltage) {
@@ -181,8 +206,8 @@ void analogSample(void)
           std::fill(std::begin(peakValues), std::end(peakValues), 0);
         }
       } else {
-        armedFlag = true;
-        Serial.println("Arm event");
+        //armedFlag = true;
+        //Serial.println("Arm event");
       }
     }
   }
@@ -255,12 +280,14 @@ void setup(void)
   Serial.println();
   Serial.println("Graphing Ammeter V1");
   pinMode(trigSensePin, INPUT_PULLUP);
+  pinMode(monitorPin, OUTPUT);
+  digitalWrite(monitorPin,LOW);
 
   LittleFS.begin();
 
   if (!SD.begin()) {
   Serial.println("Card Mount Failed");
-  return;
+  //return;
   } else {
   Serial.println("Card Mount Succeeded");    
   }
@@ -272,7 +299,10 @@ void setup(void)
   WiFi.softAP(ssid);
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
-  Serial.println(IP);
+  //Serial.println(IP);
+  //Serial.print("Open http://192.168.4.1");
+  //Serial.print(WiFi.localIP());
+  //Serial.println("/ to see the scope");
 
   initWebSocket();
   initWebServer();
@@ -282,10 +312,6 @@ void setup(void)
     Serial.println("Sending /index.html");
     request->send(LittleFS, "/index.html", "text/html", false);
     });
-
-  Serial.print("Open http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/ to see the scope");
 }
 
 void loop(void)
