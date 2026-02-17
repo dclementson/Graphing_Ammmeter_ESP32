@@ -26,7 +26,7 @@ var chartScope;
 var chartMillis = 0;
 var chartSecs = 0;
 var ampScale = 23.5 / 2048;
-var voltScale = 20 / 4096;   //53/4096
+var voltScale = 53 / 4096;   //53/4096
 var ampOffset = 2000;
 var autoScale = 2;
 var gateway = `ws://${window.location.hostname}/ws`;

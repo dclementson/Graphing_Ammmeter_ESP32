@@ -67,8 +67,6 @@ unsigned int trigVoltage = 10;      // peak detector arm threshold
 unsigned int peakValues[6] = {0};  // peak currents & peak total current
 int armCounter = 0;                 //counter for trigger debounce
 
-unsigned int synthData = 0;  //synthesized ADC data generator
-
 void reportSD();
 
 void initWebServer() {
@@ -108,25 +106,9 @@ void sendBuffer() {
 
       currentSample = 0;  // FIFO has been emptied
 
-        Serial.print(String(i));
-        Serial.print(" ");
-        Serial.print(String(timeStamps[i]));
-        Serial.print(" ");
-        Serial.println(String(samples[5][i]));
-
     }
     message[message.length() - 1] = '\0';
     ws.textAll(message);
-
-    //Serial.println("WS message sent");
-  
-    //webSocket.sendTXT(socketNumber, message);
-    // Serial.print("Socket message: [");
-    // Serial.print(message);
-    // Serial.println("]");
-    // Serial.print("Samples collected: ");
-    // Serial.println(samplesToXmit);
-    // Serial.println(String(samples[5][0]));
   }
 }
 unsigned int averageADC (unsigned int ADCNum)
@@ -136,7 +118,6 @@ unsigned int averageADC (unsigned int ADCNum)
     accum += analogRead(ADCNum);
   }
   return (accum >> 2);
-  //return synthData;
 }
 
 void analogSample(void)
@@ -148,8 +129,6 @@ void analogSample(void)
     millisLastSample = millisCurrent;
 
     digitalWrite(monitorPin,HIGH);
-
-    if ((synthData += millisDelta) >= 4096) { synthData = 0; }
    
     timeStamps[currentSample] = millisDelta;    // timestamp = millis between last samples
     samples[0][currentSample] = averageADC(ADC0); // analog current data
@@ -159,10 +138,6 @@ void analogSample(void)
     samples[4][currentSample] = averageADC(ADC4); // analog current data   
     samples[5][currentSample] = averageADC(ADC5); // analog voltage data            
     TrigFlags[currentSample] = digitalRead(trigSensePin);
-
-    //Serial.println(String(samples[5][currentSample]));
-    //Serial.println(String(timeStamps[currentSample]));
-    //Serial.println(String(millisDelta));
 
     unsigned int totalCurrent = 
       samples[0][currentSample] 
@@ -184,18 +159,18 @@ void analogSample(void)
     if (currentSample >= numberOfSamples)
     {
       currentSample = numberOfSamples - 1;  //FIFO buffer is full, overwrite last value
-      //Serial.println("ADC FIFO Full");
     }
 
     digitalWrite(monitorPin,LOW);
 
     if (armedFlag){
       if (samples[5][currentSample] < trigVoltage) {
-        reportSD();  // power down just occured
         armedFlag = false;
         armCounter = 0;
         std::fill(std::begin(peakValues), std::end(peakValues), 0);
+        Serial.println();
         Serial.println("Power-Down event");
+        reportSD();  // power down just occured
       }
     } else {
       if (armCounter < MAX_ARM_COUNT) {
@@ -206,8 +181,9 @@ void analogSample(void)
           std::fill(std::begin(peakValues), std::end(peakValues), 0);
         }
       } else {
-        //armedFlag = true;
-        //Serial.println("Arm event");
+        armedFlag = true;
+        Serial.println();
+        Serial.println("Arm event");
       }
     }
   }
@@ -258,12 +234,43 @@ void initWebSocket() {
 }
 
 void reportSD() {
+
+  unsigned long totalMillis = millis(); // Get the elapsed time
+  unsigned long seconds = totalMillis / 1000;
+  unsigned long minutes = seconds / 60;
+  unsigned long hours = minutes / 60;
+  unsigned long days  = hours / 24;
+
+  // Use modulo to get the remainder for each unit
+  seconds %= 60;
+  minutes %= 60;
+  hours   %= 24;
+
   File file = SD.open("/log.csv", FILE_APPEND);
   if (!file) {
     Serial.println("Failed to open file for appending");
     return;
   }
-  file.println();
+
+  file.println("Power-down Event");
+  file.print(days);
+  file.print(" days, ");
+  file.print(hours);
+  file.print(" hours, ");
+  file.print(minutes);
+  file.print(" minutes, ");
+  file.print(seconds);
+  file.println(" seconds");
+
+  Serial.print(days);
+  Serial.print(" days, ");
+  Serial.print(hours);
+  Serial.print(" hours, ");
+  Serial.print(minutes);
+  Serial.print(" minutes, ");
+  Serial.print(seconds);
+  Serial.println(" seconds");
+
   for (int i = 0; i < sizeof(peakValues)/sizeof(peakValues[0]); i++) {
     sprintf(fileMessage, "%4u, %7u, ", i, (peakValues[i]) );
     file.print(fileMessage);
