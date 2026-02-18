@@ -219,6 +219,8 @@ function parseMessage(message) {
 
           //  Push the X,Y sample into the graph buffer ====>
           if (collectFlag) {
+            chartMillis = chartMillis + parseInt(analogSamples[0]); //update display pointer
+
             scopeSamples1.push({
               // data to the display
               x: chartMillis,
@@ -255,7 +257,8 @@ function parseMessage(message) {
               y: chTValue,
             });
 
-            chartMillis = chartMillis + parseInt(analogSamples[0]); //update display pointer
+  
+            //console.log(chartMillis)
             if (chartMillis >= chartSize) {
               if (runFlag){
                 chartMillis = 0;
@@ -300,7 +303,7 @@ function sendMessage() {
   // # MESSAGE_NUMBER SAMPLE_InNTERVAL
   //
   websocket.send("# " + messageCounter + " " + sampleInterval);
-  console.log('Sent websocket message');
+  //console.log('Sent websocket message');
 }
 
 function openWindow(evt, windowName) {
@@ -343,7 +346,7 @@ function onClose(event) {
 
 function onMessage(event) {
     //console.log(`Received a notification from ${event.origin}`);
-    //console.log(event);
+    console.log(event);
     parseMessage(event);
 }
 
@@ -360,7 +363,7 @@ function toggleRun() {
     button.style.backgroundColor = 'palegreen'; 
     button.textContent = 'Running';
   }
-  console.log(" runFlag: " + runFlag)
+  //console.log(" runFlag: " + runFlag)
 }
 
 // Get the element with id="defaultOpen" and click on it

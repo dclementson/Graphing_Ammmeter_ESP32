@@ -103,10 +103,9 @@ void sendBuffer() {
       + "@" + String(samples[5][i])
       + "@" + String(TrigFlags[i]) 
       + ";";
-
-      currentSample = 0;  // FIFO has been emptied
-
     }
+    currentSample = 0;  // FIFO has been emptied
+
     message[message.length() - 1] = '\0';
     ws.textAll(message);
   }
@@ -158,6 +157,7 @@ void analogSample(void)
 
     if (currentSample >= numberOfSamples)
     {
+      Serial.println("ADC Buffer Overflow");
       currentSample = numberOfSamples - 1;  //FIFO buffer is full, overwrite last value
     }
 
