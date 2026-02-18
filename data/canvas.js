@@ -52,16 +52,16 @@ function setupScopeChart() {
     },
     axisX: {
       title: "Time (s)",
-      //suffix: "ms",
+      suffix: "s",
       gridColor: "#555555",
       titleFontSize: 15,
       minimum: 0,
-      maximum: chartSize,
-      viewportMaximum: chartSize,
+      maximum: chartSize /1000,
+      viewportMaximum: chartSize / 1000,
       tickThickness: 2,
       gridDashType: "solid",
       gridThickness: 2,
-      valueFormatString: "#,.0",
+      valueFormatString: "#.0",
     },
     axisY: {
       title: "Current",
@@ -167,8 +167,8 @@ function setupScopeChart() {
 
 function chartRescale() {
   chartScope.axisX[0].set("minimum", 0, false);
-  chartScope.axisX[0].set("maximum", chartSize, false);
-  chartScope.axisX[0].set("viewportMaximum", chartSize, false);
+  chartScope.axisX[0].set("maximum", chartSize / 1000, false);
+  chartScope.axisX[0].set("viewportMaximum", chartSize / 1000, false);
 }
       
 function parseMessage(message) {
@@ -223,37 +223,37 @@ function parseMessage(message) {
 
             scopeSamples1.push({
               // data to the display
-              x: chartMillis,
+              x: chartMillis /1000,
               y: ch1Value,
             });
             scopeSamples2.push({
               // data to the display
-              x: chartMillis,
+              x: chartMillis /1000,
               y: ch2Value,
             });
             scopeSamples3.push({
               // data to the display
-              x: chartMillis,
+              x: chartMillis / 1000, 
               y: ch3Value,
             });
             scopeSamples4.push({
               // data to the display
-              x: chartMillis,
+              x: chartMillis / 1000,
               y: ch4Value,
             });
             scopeSamples5.push({
               // data to the display
-              x: chartMillis,
+              x: chartMillis /1000,
               y: ch5Value,
             });
             scopeSamples6.push({
               // data to the display
-              x: chartMillis,
+              x: chartMillis / 1000,
               y: ch6Value,
             });
             scopeSamplesT.push({
               // data to the display
-              x: chartMillis,
+              x: chartMillis / 1000,
               y: chTValue,
             });
 
