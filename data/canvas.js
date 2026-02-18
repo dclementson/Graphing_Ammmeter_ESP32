@@ -52,16 +52,17 @@ function setupScopeChart() {
     },
     axisX: {
       title: "Time (s)",
-      suffix: "s",
+      //suffix: "s",
       gridColor: "#555555",
       titleFontSize: 15,
       minimum: 0,
-      maximum: chartSize /1000,
+      maximum: chartSize / 1000,
       viewportMaximum: chartSize / 1000,
       tickThickness: 2,
       gridDashType: "solid",
       gridThickness: 2,
-      valueFormatString: "#.00",
+      valueFormatString: "0.##",
+      interval: chartSize / 10000,
     },
     axisY: {
       title: "Current",
@@ -169,6 +170,7 @@ function chartRescale() {
   chartScope.axisX[0].set("minimum", 0, false);
   chartScope.axisX[0].set("maximum", chartSize / 1000, false);
   chartScope.axisX[0].set("viewportMaximum", chartSize / 1000, false);
+  chartScope.axisX[0].set("interval", chartSize / 10000, false);
 }
       
 function parseMessage(message) {
