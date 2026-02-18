@@ -61,7 +61,7 @@ function setupScopeChart() {
       tickThickness: 2,
       gridDashType: "solid",
       gridThickness: 2,
-      valueFormatString: "#.0",
+      valueFormatString: "#.00",
     },
     axisY: {
       title: "Current",
