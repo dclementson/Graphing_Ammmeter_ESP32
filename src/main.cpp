@@ -307,17 +307,13 @@ void setup(void)
       }
   }
 
-  // WiFiManager wifiManager;
-  // wifiManager.autoConnect("AutoConnectAP");
 
   Serial.print("Setting AP (Access Point)…");
   WiFi.softAP(ssid);
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
-  //Serial.println(IP);
-  //Serial.print("Open http://192.168.4.1");
-  //Serial.print(WiFi.localIP());
-  //Serial.println("/ to see the scope");
+  Serial.println(IP);
+
 
   initWebSocket();
   initWebServer();
