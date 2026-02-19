@@ -23,7 +23,6 @@
 #include <LittleFS.h>
 #include "SD.h"
 #include "SPI.h"
-#include <WiFiManager.h>  //needs to be included before ESPAsyncWebServer.h
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <AsyncEventSource.h>
