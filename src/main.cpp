@@ -43,6 +43,7 @@
 #define monitorPin GPIO_NUM_27
 
 const char* ssid  = "ESP32-Access-Point";
+const bool logging = false;  // set to "true" for SD card logging
 
 AsyncWebServer server(HTTP_PORT);
 AsyncWebSocket ws("/ws");
@@ -68,6 +69,7 @@ unsigned int peakValues[6] = {0};  // peak currents & peak total current
 int armCounter = 0;                 //counter for trigger debounce
 
 void reportSD();
+void triggerCheck();
 
 void initWebServer() {
     server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
@@ -157,13 +159,19 @@ void analogSample(void)
 
     if (currentSample >= numberOfSamples)
     {
-      Serial.println("ADC Buffer Overflow");
+      //Serial.println("ADC Buffer Overflow");
       currentSample = numberOfSamples - 1;  //FIFO buffer is full, overwrite last value
     }
-
     digitalWrite(monitorPin,LOW);
 
-    if (armedFlag){
+    if(logging){
+      triggerCheck();
+    }
+  }
+}
+
+void triggerCheck(){
+      if (armedFlag){
       if (samples[5][currentSample] < trigVoltage) {
         armedFlag = false;
         armCounter = 0;
@@ -186,7 +194,6 @@ void analogSample(void)
         Serial.println("Arm event");
       }
     }
-  }
 }
 
 void onEvent(AsyncWebSocket       *server,
@@ -292,11 +299,13 @@ void setup(void)
 
   LittleFS.begin();
 
-  if (!SD.begin()) {
-  Serial.println("Card Mount Failed");
-  //return;
-  } else {
-  Serial.println("Card Mount Succeeded");    
+  if (logging){
+    if (!SD.begin()) {
+      Serial.println("Card Mount Failed");
+      //return;
+      } else {
+      Serial.println("Card Mount Succeeded");    
+      }
   }
 
   // WiFiManager wifiManager;
