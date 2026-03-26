@@ -1,4 +1,6 @@
 /* V1
+  Current Logger for the Computer History Museun's DE 1401
+  
   This application samples the analog inputs and one GPIO of the ESP32
   and transmits the data via websockets for display in a web browser
 
@@ -42,7 +44,7 @@
 #define monitorPin GPIO_NUM_27
 
 const char* ssid  = "ESP32-Access-Point";
-const bool logging = false;  // set to "true" for SD card logging
+const bool logging = true;  // set to "true" for SD card logging
 
 AsyncWebServer server(HTTP_PORT);
 AsyncWebSocket ws("/ws");
@@ -172,12 +174,12 @@ void analogSample(void)
 void triggerCheck(){
       if (armedFlag){
       if (samples[5][currentSample] < trigVoltage) {
-        armedFlag = false;
-        armCounter = 0;
-        std::fill(std::begin(peakValues), std::end(peakValues), 0);
         Serial.println();
         Serial.println("Power-Down event");
         reportSD();  // power down just occured
+        std::fill(std::begin(peakValues), std::end(peakValues), 0);
+        armCounter = 0;
+        armedFlag = false;
       }
     } else {
       if (armCounter < MAX_ARM_COUNT) {
